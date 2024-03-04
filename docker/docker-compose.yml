@@ -1,0 +1,68 @@
+version: '3.8'
+
+services:
+
+  db:
+    user: root
+    image: postgres:15.3
+    container_name: "${NAME}_auth_db"
+    restart: always
+    ports:
+      - "5432:5432"
+    expose:
+      - "5432"
+    volumes:
+      - ./volumes/postgres_data:/var/lib/postgresql/data
+    env_file:
+      - ../.env
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    logging: &logging
+      driver: json-file
+      options:
+        max-size: "512m"
+        max-file: "3"
+
+  pgadmin:
+    user: root
+    image: dpage/pgadmin4
+    container_name: "${NAME}_auth_pgadmin"
+    restart: always
+    ports:
+      - "${PGADMIN_EXTERNAL_PORT}:80"
+    expose:
+      - "${PGADMIN_EXTERNAL_PORT}"
+    env_file:
+      - ../.env
+    volumes:
+      - ./volumes/pgadmin:/var/lib/pgadmin
+    logging: *logging
+
+  migration:
+    container_name: "${NAME}_auth_migration"
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.migration.dockerfile
+    depends_on:
+      db:
+        condition: service_started
+    # command: sh -c "alembic upgrade head && echo 'Migration completed'"
+    logging: *logging
+
+  app:
+    container_name: "${NAME}_auth_app"
+    restart: always
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    ports:
+      - "${APP_EXTERNAL_PORT}:8000"
+    expose:
+      - "${APP_EXTERNAL_PORT}"
+    depends_on:
+      - db
+      - migration
+    logging: *logging
