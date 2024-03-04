@@ -1,0 +1,23 @@
+files
+
+# JWT secret keys
+*.pem
+
+venv
+.env
+*.log
+*.html
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+test.py
+
+# Docker volumes
+postgres_data
+pgadmin
+volumes
+
+# IDE
+.idea
+
