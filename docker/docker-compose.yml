@@ -5,17 +5,17 @@ services:
   db:
     user: root
     image: postgres:15.3
-    container_name: "${NAME}_auth_db"
+    container_name: "${COMPOSE_PROJECT_NAME}_auth_db"
     restart: always
-    ports:
-      - "5432:5432"
-    expose:
-      - "5432"
+#    ports:
+#      - "5432:5432"
+#    expose:
+#      - "5432"
     volumes:
       - ./volumes/postgres_data:/var/lib/postgresql/data
     env_file:
       - ../.env
-    healthcheck:
+    healthcheck: &healthcheck
       test: [ "CMD-SHELL", "pg_isready -U postgres" ]
       interval: 10s
       timeout: 5s
@@ -23,13 +23,13 @@ services:
     logging: &logging
       driver: json-file
       options:
-        max-size: "512m"
-        max-file: "3"
+        max-size: "64m"
+        max-file: "4"
 
   pgadmin:
     user: root
     image: dpage/pgadmin4
-    container_name: "${NAME}_auth_pgadmin"
+    container_name: "${COMPOSE_PROJECT_NAME}_auth_pgadmin"
     restart: always
     ports:
       - "${PGADMIN_EXTERNAL_PORT}:80"
@@ -42,7 +42,7 @@ services:
     logging: *logging
 
   migration:
-    container_name: "${NAME}_auth_migration"
+    container_name: "${COMPOSE_PROJECT_NAME}_auth_migration"
     build:
       context: ..
       dockerfile: docker/Dockerfile.migration.dockerfile
@@ -53,7 +53,7 @@ services:
     logging: *logging
 
   app:
-    container_name: "${NAME}_auth_app"
+    container_name: "${COMPOSE_PROJECT_NAME}_auth_app"
     restart: always
     build:
       context: ..
@@ -66,3 +66,34 @@ services:
       - db
       - migration
     logging: *logging
+
+  test_db:
+    user: root
+    image: postgres:15.3
+    container_name: "${COMPOSE_PROJECT_NAME}_auth_test_db"
+    restart: always
+#    ports:
+#      - "5432:5432"
+#    expose:
+#      - "5432"
+#    env_file:
+#      - ../.env
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: test
+    healthcheck: *healthcheck
+    logging: *logging
+
+  pytest_app:
+    container_name: "${COMPOSE_PROJECT_NAME}_auth_pytest_app"
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.pytest.dockerfile
+    volumes:
+      - ..:/app
+    depends_on:
+      - test_db
+    logging: *logging
+
+# docker-compose --env-file .env -f .\docker\docker-compose.yml up -d --build

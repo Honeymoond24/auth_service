@@ -1,14 +1,13 @@
 import datetime
 from typing import Optional
 
-from fastapi import HTTPException, Security, Depends
+from fastapi import Depends
 from fastapi.security import OAuth2PasswordBearer
 from jose import JWTError, jwt
 
 from src.auth.config import auth_config
 from src.auth.exceptions import AuthRequired, InvalidToken
 from src.auth.schemas import JWTData
-from src.config import settings
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="auth/token")
 with open("keys/private_key.pem", "r") as file:

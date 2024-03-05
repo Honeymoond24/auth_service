@@ -8,13 +8,13 @@
 * alembic init migrations
 * alembic revision --autogenerate -m "Database creation"
 
-
 ## How to run
 
 ### On production
-* alembic upgrade head
-* gunicorn main:app --workers 1 --worker-class uvicorn.workers.UvicornWorker --bind 0.0.0.0:10050
-* docker-compose up --build
+
+* sudo docker-compose --env-file .env -f .\docker\docker-compose.yml up -d --build
 
 ### On dev
+
+* sudo docker-compose --env-file .env -f .\docker\docker-compose.yml up -d --build
 * uvicorn main:app --reload

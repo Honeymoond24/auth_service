@@ -1,12 +1,12 @@
-from passlib.context import CryptContext
+import bcrypt
 
 
 def hash_password(password: str) -> str:
-    return CryptContext(schemes=["bcrypt"], deprecated="auto").hash(password)
+    return bcrypt.hashpw(password.encode(), bcrypt.gensalt()).decode()
 
 
 def verify_password(password: str, hashed_password: str) -> bool:
-    return CryptContext(schemes=["bcrypt"], deprecated="auto").verify(password, hashed_password)
+    return bcrypt.checkpw(password.encode(), hashed_password.encode())
 
 
 if __name__ == '__main__':
