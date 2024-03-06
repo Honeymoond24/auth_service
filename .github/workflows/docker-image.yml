@@ -41,5 +41,5 @@ jobs:
           cd ~/auth_service/
           # Deployment commands
           git pull
-          sudo docker-compose --env-file .env -f .\docker\docker-compose.yml up -d --build
+          sudo docker-compose --env-file .env -f ./docker/docker-compose.yml up -d --build
         EOF
