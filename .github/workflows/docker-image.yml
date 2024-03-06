@@ -15,7 +15,8 @@ jobs:
     steps:
     - name: Checkout
       uses: actions/checkout@v3
-    - name: Install dependencies
+
+    - name: Setup environment
       run: |
         cp .env_example .env
     - uses: isbang/compose-action@v1.5.1
@@ -24,3 +25,21 @@ jobs:
         down-flags: "--volumes"
         services: |
           pytest_app
+
+    - name: Set up SSH
+      if: success()  # Proceed with deployment only if tests pass
+      run: |
+        mkdir -p ~/.ssh/
+        echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+        chmod 600 ~/.ssh/id_rsa
+        ssh-keyscan -H 130.61.124.213 >> ~/.ssh/known_hosts
+
+    - name: Deploy to VPS
+      if: success()  # Proceed with deployment only if tests pass
+      run: |
+        ssh -i ~/.ssh/id_rsa ubuntu@130.61.124.213 << 'EOF'
+          cd ~/auth_service/
+          # Deployment commands
+          git pull
+          sudo docker-compose --env-file .env -f .\docker\docker-compose.yml up -d --build
+        EOF
