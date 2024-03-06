@@ -15,6 +15,8 @@
 * sudo docker-compose --env-file .env -f .\docker\docker-compose.yml up -d --build
 
 ### On dev
-
-* sudo docker-compose --env-file .env -f .\docker\docker-compose.yml up -d --build
-* uvicorn main:app --reload
+* Testing
+  * docker-compose -p auth --env-file .env -f .\docker\docker-compose.yml up --build pytest_app
+* Run
+  * sudo docker-compose --env-file .env -f .\docker\docker-compose.yml up -d --build
+  * uvicorn main:app --reload
